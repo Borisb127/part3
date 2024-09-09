@@ -8,14 +8,12 @@ const cors = require('cors');
 const app = express();
 const Person = require('./models/person');
 
+
 app.use(express.json());
 app.use(cors());
 
 
-
 app.use(express.static('dist'));
-
-
 
 
 morgan.token('body', (request) => JSON.stringify(request.body));
@@ -69,17 +67,20 @@ app.get('/api/persons/:id', (request, response) => {
 
 
 app.delete('/api/persons/:id', (request, response) => {
-  const id = request.params.id;
-  persons = persons.filter(p => p.id !== id);
+  Person.findByIdAndDelete(request.params.id)
+    .then(result => {
+      if (result) {
+        response.status(204).end();
+      } else {
+        response.status(404).send({ error: 'Person not found' });
+      }
+    })
+    .catch(error => {
+      console.log('Error deleting person:', error);
+      response.status(500).json({ error: 'Failed to delete person from the database' });
+    })
+  })
 
-  response.status(204).end();
-})
-
-
-
-const generateId = () => {
-  return String(Math.floor(Math.random() * 1000));
-}
 
 
 app.post('/api/persons', (request, response) => {
@@ -94,20 +95,21 @@ app.post('/api/persons', (request, response) => {
     return response.status(400).json({ error: 'number is missing' })
   }
 
-  if (persons.find(p => p.name === body.name)) {
-    return response.status(400).json({ error: 'name must be unique' })
-  }
 
-
-  const person = {
-    id: generateId(),
+  const person = new Person ({
     name: body.name,
     number: body.number,
-  }
+  })
 
-  persons = persons.concat(person);
+  person.save().then(savedPerson => {
+    response.json(savedPerson);
+  }).catch(error => {
+    console.log('Error saving new person:', error);
+    response.status(500).json({ error: 'Failed to save person to the database' });
 
-  response.json(person);
+  })
+
+  
 })
 
 

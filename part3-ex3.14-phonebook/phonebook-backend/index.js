@@ -8,15 +8,13 @@ const cors = require('cors');
 const app = express();
 const Person = require('./models/person');
 
+
 app.use(express.json());
 app.use(cors());
 
 
 
 app.use(express.static('dist'));
-
-
-
 
 morgan.token('body', (request) => JSON.stringify(request.body));
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
@@ -77,11 +75,6 @@ app.delete('/api/persons/:id', (request, response) => {
 
 
 
-const generateId = () => {
-  return String(Math.floor(Math.random() * 1000));
-}
-
-
 app.post('/api/persons', (request, response) => {
   
   const body = request.body;
@@ -94,20 +87,21 @@ app.post('/api/persons', (request, response) => {
     return response.status(400).json({ error: 'number is missing' })
   }
 
-  if (persons.find(p => p.name === body.name)) {
-    return response.status(400).json({ error: 'name must be unique' })
-  }
 
-
-  const person = {
-    id: generateId(),
+  const person = new Person ({
     name: body.name,
     number: body.number,
-  }
+  })
 
-  persons = persons.concat(person);
+  person.save().then(savedPerson => {
+    response.json(savedPerson);
+  }).catch(error => {
+    console.log('Error saving new person:', error);
+    response.status(500).json({ error: 'Failed to save person to the database' });
 
-  response.json(person);
+  })
+
+  
 })
 
 
