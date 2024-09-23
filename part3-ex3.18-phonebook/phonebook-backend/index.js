@@ -25,7 +25,7 @@ let persons = []
 
 
 // Info route 
-app.get('/info', (request, response) => {
+app.get('/info', (request, response, next) => {
   Person.countDocuments({})
     .then(count => {
       const currentTime = new Date();
@@ -47,7 +47,7 @@ app.get('/info', (request, response) => {
 
 
 // Get all persons
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
   Person.find({}).then(persons => {
     console.log('Fetched persons:', persons)
     response.json(persons);
