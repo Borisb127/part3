@@ -1,9 +1,9 @@
 import axios from 'axios';
 const baseUrl = import.meta.env.VITE_BACKEND_URL;
-console.log(baseUrl)
+
 
 const getAll = () => {
-    const request = axios.get(baseUrl)
+    console.log(baseUrl)
     return request.then(response => response.data)
 };
 
